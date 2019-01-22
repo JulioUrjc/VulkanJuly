@@ -32,7 +32,6 @@ function(buildExamples)
 endfunction(buildExamples)
 
 set(EXAMPLES
-	julyGrid
 	tutorial01
 	tutorial02
 	tutorial03
