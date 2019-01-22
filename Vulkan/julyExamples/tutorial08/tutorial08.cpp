@@ -1,3 +1,5 @@
+#pragma comment(linker, "/subsystem:console")
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -26,6 +28,7 @@
 #include "optional.h"
 #include <set>
 #include <unordered_map>
+
 
 const int WIDTH = 800;
 const int HEIGHT = 600;

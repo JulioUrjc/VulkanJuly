@@ -7,8 +7,13 @@
 
 #include "julyGrid.h"
 
-VulkanFramework::VulkanFramework()
+VulkanFramework::VulkanFramework() : VulkanExampleBase( ENABLE_VALIDATION )
 {
+  zoom = -2.5f;
+  title = "Vulkan July- Basic grid";
+
+  settings.overlay = true;
+
   initGeo( &triangle_ );
   initGeo( &grid_ );
   initGeo( &axes_ );
@@ -660,7 +665,7 @@ void VulkanFramework::viewChanged()
 
 
 VulkanFramework *vulkanFramework;
-int main()
+LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
   if ( vulkanFramework != NULL )
   {

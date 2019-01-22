@@ -1,95 +1,48 @@
 #ifndef JULY_VULKAN_FRAMEWORK_H_
 #define JULY_VULKAN_FRAMEWORK_H_
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <fstream>
+#include <vector>
+#include <exception>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/hash.hpp>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
-
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
-#include <algorithm>
-#include <chrono>
-#include <vector>
-#include <cstring>
-#include <cstdlib>
-#include <array>
-#include "optional.h"
-#include <set>
-#include <unordered_map>
-
 
 #include <vulkan/vulkan.h>
+#include "base/vulkanexamplebase.h"
+#include "base/VulkanModel.hpp"
+#include "base/VulkanBuffer.hpp"
 
-class VulkanFramework
+// Set to "true" to enable Vulkan's validation layers (see vulkandebug.cpp for details)
+#define ENABLE_VALIDATION false
+// Set to "true" to use staging buffers for uploading vertex and index data to device local memory
+// See "prepareVertices" for details on what's staging and on why to use it
+#define USE_STAGING true
+
+class VulkanFramework : public VulkanExampleBase
 {
 public:
 
   // Vertex layout used in this example
-  //struct Vertex
-  //{
-  //  float position[3];
-  //  float color[3];
-  //};
-  struct Vertex {
-    glm::vec3 pos;
-    glm::vec3 color;
-    glm::vec2 texCoord;
-
-    static VkVertexInputBindingDescription getBindingDescription() {
-      VkVertexInputBindingDescription bindingDescription = {};
-      bindingDescription.binding = 0;
-      bindingDescription.stride = sizeof(Vertex);
-      bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-      return bindingDescription;
-    }
-
-    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-      std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = {};
-
-      attributeDescriptions[0].binding = 0;
-      attributeDescriptions[0].location = 0;
-      attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-      attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-      attributeDescriptions[1].binding = 0;
-      attributeDescriptions[1].location = 1;
-      attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-      attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-      attributeDescriptions[2].binding = 0;
-      attributeDescriptions[2].location = 2;
-      attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-      attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-      return attributeDescriptions;
-    }
-
-    bool operator==(const Vertex& other) const {
-      return pos == other.pos && color == other.color && texCoord == other.texCoord;
-    }
+  struct Vertex
+  {
+    float position[3];
+    float color[3];
   };
 
   // Struct to allocate grid info
   struct Pollitos
   {
     VkDevice device;
-    std::vector<Vertex> vertices;
+    vks::Buffer vertices;
     uint32_t vertexCount;
-    std::vector<Vertex> indices;
+    vks::Buffer indices;
     uint32_t indexCount;
   };
 
@@ -97,9 +50,9 @@ public:
   // Uniform buffer block object
   struct
   {
-     std::vector<Vertex> grid;
-     std::vector<Vertex> triangle;
-     std::vector<Vertex> axes;
+    vks::Buffer grid;
+    vks::Buffer triangle;
+    vks::Buffer axes;
   }  uniformBuffers_;
 
 
