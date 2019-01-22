@@ -1,0 +1,6 @@
+[submodule "Vulkan/external/stb"]
+	path = Vulkan/external/stb
+	url = https://github.com/nothings/stb.git
+[submodule "vulkan/external/tinyobjloader"]
+	path = vulkan/external/tinyobjloader
+	url = https://github.com/syoyo/tinyobjloader.git
