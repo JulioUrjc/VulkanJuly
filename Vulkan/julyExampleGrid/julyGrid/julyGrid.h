@@ -37,7 +37,7 @@ public:
   };
 
   // Struct to allocate grid info
-  struct Pollitos
+  struct GridInfo
   {
     VkDevice device;
     vks::Buffer vertices;
@@ -138,10 +138,10 @@ public:
 public:
   
   ///
-  void initGeo( Pollitos* p );
+  void initGeo( GridInfo* p );
 
   ///
-  void destroyGeo( Pollitos* p );
+  void destroyGeo( GridInfo* p );
 
   ///
   void prepareGrid( const int cellCount, const float cellSize );
@@ -174,9 +174,9 @@ private:
 
   float runningTime;
 
-  Pollitos triangle_;
-  Pollitos grid_;
-  Pollitos axes_;
+  GridInfo triangle_;
+  GridInfo grid_;
+  GridInfo axes_;
 
 };
 

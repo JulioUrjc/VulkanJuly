@@ -5,7 +5,7 @@
 *
 */
 
-#include "RaquelGrid.h"
+#include "julyGrid.h"
 
 VulkanFramework::VulkanFramework() : VulkanExampleBase( ENABLE_VALIDATION )
 {
@@ -44,7 +44,7 @@ VulkanFramework::~VulkanFramework()
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void VulkanFramework::initGeo( Pollitos* p )
+void VulkanFramework::initGeo( GridInfo* p )
 {
   p->device = nullptr;
   p->vertexCount = 0;
@@ -53,7 +53,7 @@ void VulkanFramework::initGeo( Pollitos* p )
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void VulkanFramework::destroyGeo( Pollitos* p )
+void VulkanFramework::destroyGeo( GridInfo* p )
 {
   if ( p->device != nullptr )
   {

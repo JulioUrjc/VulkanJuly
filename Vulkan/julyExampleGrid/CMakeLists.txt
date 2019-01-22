@@ -35,7 +35,7 @@ function(buildExamples)
 endfunction(buildExamples)
 
 set(EXAMPLES
-	RaquelGrid
+	julyGrid
 )
 
 buildExamples()
