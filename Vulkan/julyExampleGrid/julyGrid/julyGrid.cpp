@@ -9,22 +9,22 @@
 
 VulkanFramework::VulkanFramework() : VulkanExampleBase( ENABLE_VALIDATION )
 {
-  zoom = -2.5f;
   title = "Vulkan July- Basic grid";
+  zoom = -2.5f;
 
   settings.overlay = true;
+  showGrid_ = true;
+  blockGrid_ = false;
 
   initGeo( &triangle_ );
   initGeo( &grid_ );
   initGeo( &axes_ );
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
 VulkanFramework::~VulkanFramework()
 {
-  // Clean up used Vulkan resources 
   // Note: Inherited destructor cleans up resources stored in base class
   vkDestroyPipeline( device, pipelines_.triangle, nullptr );
   vkDestroyPipeline( device, pipelines_.grid, nullptr );
@@ -122,14 +122,16 @@ void VulkanFramework::buildCommandBuffers()
     vkCmdBindIndexBuffer( drawCmdBuffers[i], triangle_.indices.buffer, 0, VK_INDEX_TYPE_UINT32 );
     vkCmdDrawIndexed( drawCmdBuffers[i], triangle_.indexCount, 1, 0, 0, 1 );
 
-    // Grid 
-    vkCmdBindDescriptorSets( drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSets_.grid, 0, nullptr );
-    vkCmdBindPipeline( drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines_.grid );
-    
-    vkCmdBindVertexBuffers( drawCmdBuffers[i], 0, 1, &grid_.vertices.buffer, offsets );
-    vkCmdBindIndexBuffer( drawCmdBuffers[i], grid_.indices.buffer, 0, VK_INDEX_TYPE_UINT32 );
-    vkCmdDrawIndexed( drawCmdBuffers[i], grid_.indexCount, 1, 0, 0, 1 );
-
+    if(showGrid_)
+    {
+        // Grid 
+        vkCmdBindDescriptorSets( drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSets_.grid, 0, nullptr );
+        vkCmdBindPipeline( drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines_.grid );
+        
+        vkCmdBindVertexBuffers( drawCmdBuffers[i], 0, 1, &grid_.vertices.buffer, offsets );
+        vkCmdBindIndexBuffer( drawCmdBuffers[i], grid_.indices.buffer, 0, VK_INDEX_TYPE_UINT32 );
+        vkCmdDrawIndexed( drawCmdBuffers[i], grid_.indexCount, 1, 0, 0, 1 );
+    }
     // Axes 
     vkCmdBindDescriptorSets( drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSets_.axes, 0, nullptr );
     vkCmdBindPipeline( drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines_.axes );
@@ -260,25 +262,13 @@ void VulkanFramework::prepareGrid( const int cellCount, const float cellSize )
 void VulkanFramework::prepareAxes()
 {
   // Position + Color vertex
-  std::vector<float> vertexBuffer = { 0.0f,  0.0f, 0.0f,      1.0f, 0.0f, 0.0f,
+  std::vector<float> vertexBuffer = { 0.0f,  0.01f, 0.0f,      0.5f, 0.5f, 0.5f,
                                       1.0f,  0.0f, 0.0f,      1.0f, 0.0f, 0.0f,
-                                      0.0f,  0.0f, 0.0f,      0.0f, 1.0f, 0.0f,
                                       0.0f,  1.0f, 0.0f,      0.0f, 1.0f, 0.0f,
-                                      0.0f,  0.0f, 0.0f,      0.0f, 0.0f, 1.0f,
                                       0.0f,  0.0f, 1.0f,      0.0f, 0.0f, 1.0f };
-  std::vector<uint32_t> indexBuffer = { 0, 1, 2, 3, 4, 5 };
-  axes_.vertexCount = 6;
+  std::vector<uint32_t> indexBuffer = { 0, 1, 0, 2, 0, 3 };
+  axes_.vertexCount = 4;
   axes_.indexCount = indexBuffer.size();
-
-  //// Position + Color vertex
-  //std::vector<float> vertexBuffer = { 2.0f,  2.0f, 0.0f,      1.0f, 0.0f, 0.0f,
-  //                                   -2.0f,  2.0f, 0.0f,      0.0f, 1.0f, 0.0f,
-  //                                    0.0f, -2.0f, 0.0f,      0.0f, 0.0f, 1.0f };
-  ////std::vector<float> vertexBuffer = { 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f };
-  //std::vector<uint32_t> indexBuffer = { 0, 1, 1, 2, 2, 0 };
-  //triangle_.vertexCount = 3;
-  //triangle_.indexCount = indexBuffer.size();
-
 
   uint32_t vBufferSize = static_cast<uint32_t>( vertexBuffer.size() ) * sizeof( float );
   uint32_t iBufferSize = static_cast<uint32_t>( indexBuffer.size() ) * sizeof( uint32_t );
@@ -332,7 +322,7 @@ void VulkanFramework::prepareAxes()
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void VulkanFramework::prepareVertices()
+void VulkanFramework::prepareTriangle()
 {
   // Position + Color vertex
   std::vector<float> vertexBuffer = { 1.0f,  1.0f, 0.0f,      1.0f, 0.0f, 0.0f,
@@ -561,8 +551,9 @@ void VulkanFramework::prepareUniformBuffers()
     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
     &uniformBuffers_.grid,
-    sizeof( uboVS_ ) );
-  VK_CHECK_RESULT( uniformBuffers_.grid.map() );
+    sizeof(uboVS_));
+  VK_CHECK_RESULT(uniformBuffers_.grid.map());
+ 
 
   // Axes uniform buffer block
   vulkanDevice->createBuffer(
@@ -590,8 +581,10 @@ void VulkanFramework::updateUniformBuffers()
   uboVS_.modelMatrix = glm::rotate( uboVS_.modelMatrix, glm::radians( rotation.z ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
   uniformBuffers_.triangle.copyTo( &uboVS_, sizeof( uboVS_ ) );
-  uniformBuffers_.grid.copyTo( &uboVS_, sizeof( uboVS_ ) );
   uniformBuffers_.axes.copyTo( &uboVS_, sizeof( uboVS_ ) );
+
+  if(!blockGrid_)
+    uniformBuffers_.grid.copyTo(&uboVS_, sizeof(uboVS_));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -600,9 +593,9 @@ void VulkanFramework::prepare()
 {
   VulkanExampleBase::prepare();
   
-  prepareVertices();
-  prepareGrid( 20, 1.0f );
+  prepareTriangle();
   prepareAxes();
+  prepareGrid( 20, 1.0f );
 
   prepareUniformBuffers();
   setupDescriptorSetLayout();
@@ -649,20 +642,18 @@ void VulkanFramework::OnUpdateUIOverlay( vks::UIOverlay *overlay )
 {
   if ( overlay->header( "Settings" ) )
   {
-    bool mesh = true;
-    overlay->checkBox( "Display Mesh", &mesh );
-    float value = 1.0f;
-    overlay->sliderFloat( "Animation speed", &value, 0.0f, 10.0f );
+    //bool mesh = true;
+    overlay->checkBox( "Block Grid", &blockGrid_);
+    //float value = 1.0f;
+    overlay->checkBox("Hide Grid", &showGrid_);
   }
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
-
 
 VulkanFramework *vulkanFramework;
 LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
@@ -673,6 +664,7 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
   }
   return ( DefWindowProc( hWnd, uMsg, wParam, lParam ) );
 }
+
 int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow )
 {
   for ( size_t i = 0; i < __argc; i++ ) { VulkanFramework::args.push_back( __argv[i] ); };

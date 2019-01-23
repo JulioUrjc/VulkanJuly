@@ -32,8 +32,8 @@ public:
   // Vertex layout used in this example
   struct Vertex
   {
-    float position[3];
-    float color[3];
+    glm::vec3 position;
+    glm::vec3 color;
   };
 
   // Struct to allocate grid info
@@ -100,7 +100,6 @@ public:
 
   ///
   VulkanFramework( );
-
   ///
   ~VulkanFramework( );
 
@@ -114,7 +113,7 @@ public:
 
   // Prepare vertex and index buffers for an indexed triangle
   // Also uploads them to device local memory using staging and initializes vertex input and attribute binding to match the vertex shader
-  void prepareVertices();
+  void prepareTriangle();
 
   ///
   void setupDescriptorPool( );
@@ -139,10 +138,8 @@ public:
   
   ///
   void initGeo( GridInfo* p );
-
   ///
   void destroyGeo( GridInfo* p );
-
   ///
   void prepareGrid( const int cellCount, const float cellSize );
 
@@ -153,13 +150,10 @@ public:
 
   ///
   void draw( );
-
   ///
   void prepare( );
-
   ///
   virtual void render( );
-
   ///
   virtual void viewChanged();
 
@@ -178,6 +172,8 @@ private:
   GridInfo grid_;
   GridInfo axes_;
 
+  bool blockGrid_;
+  bool showGrid_;
 };
 
 #endif
