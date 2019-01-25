@@ -380,12 +380,11 @@ const std::vector<uint16_t> indices_ = { 0, 1, 2, 2, 3, 0 };
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
-    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
+    // Tipo de vertices que pasamos al shader
     auto bindingDescription = Vertex::getBindingDescription();
     auto attributeDescriptions = Vertex::getAttributeDescriptions();
-
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertexInputInfo.vertexBindingDescriptionCount = 1;
     vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
     vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
