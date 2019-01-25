@@ -666,6 +666,7 @@ private:
     VkCommandPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    poolInfo.flags = 0; // Optional
 
     if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
       throw std::runtime_error("failed to create graphics command pool!");
@@ -801,24 +802,23 @@ private:
       VkCommandBufferBeginInfo beginInfo = {};
       beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
       beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+      beginInfo.pInheritanceInfo = nullptr; // Optional
 
       if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
       }
 
+      VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
       VkRenderPassBeginInfo renderPassInfo = {};
       renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
       renderPassInfo.renderPass = renderPass;
       renderPassInfo.framebuffer = swapChainFramebuffers[i];
       renderPassInfo.renderArea.offset = { 0, 0 };
-      renderPassInfo.renderArea.extent = swapChainExtent;
-
-      VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+      renderPassInfo.renderArea.extent = swapChainExtent;  
       renderPassInfo.clearValueCount = 1;
       renderPassInfo.pClearValues = &clearColor;
 
       vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
       vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
       VkBuffer vertexBuffers[] = { vertexBuffer };

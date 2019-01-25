@@ -470,7 +470,7 @@ void VulkanFramework::preparePipelines()
   VkPipelineRasterizationStateCreateInfo rasterizationState =
     vks::initializers::pipelineRasterizationStateCreateInfo(
       VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0 );
-  rasterizationState.lineWidth = 1.0f;
+  rasterizationState.lineWidth = 5.0f;
 
   VkPipelineColorBlendAttachmentState blendAttachmentState =
     vks::initializers::pipelineColorBlendAttachmentState( 0xf, VK_FALSE );
