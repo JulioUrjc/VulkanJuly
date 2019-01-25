@@ -3,8 +3,6 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include <glm/glm.hpp>
-
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -16,6 +14,7 @@
 #include "optional.h"
 #include <set>
 #include "tutorial03Cubo.h"
+#include "vertex.h"  // incluye glm
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -24,6 +23,14 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 const std::vector<const char*> validationLayers = { "VK_LAYER_LUNARG_standard_validation" };
 const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
+const std::vector<Vertex> vertices_ = {
+  { { -0.5f, -0.5f },{1.0f, 0.0f, 0.0f} },
+  { { 0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f } },
+  { { 0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f } },
+  { { -0.5f, 0.5f },{ 1.0f, 1.0f, 1.0f } }
+};
+
+const std::vector<uint16_t> indices_ = { 0, 1, 2, 2, 3, 0 };
 
   void HelloTriangleApplication::run() {
     initWindow();
@@ -183,10 +190,10 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
 
   /****************   Logical device  ******************/
   void HelloTriangleApplication::createLogicalDevice() {
-    QueueFamilyIndices indices = findQueueFamilies(physicalDevice_);
+    QueueFamilyIndices indices2 = findQueueFamilies(physicalDevice_);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+    std::set<uint32_t> uniqueQueueFamilies = { indices2.graphicsFamily.value(), indices2.presentFamily.value() };
 
     float queuePriority = 1.0f;
     for (uint32_t queueFamily : uniqueQueueFamilies) {
@@ -223,8 +230,8 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
       throw std::runtime_error("failed to create logical device_!");
     }
 
-    vkGetDeviceQueue(device_, indices.graphicsFamily.value(), 0, &graphicsQueue_);
-    vkGetDeviceQueue(device_, indices.presentFamily.value(), 0, &presentQueue_);
+    vkGetDeviceQueue(device_, indices2.graphicsFamily.value(), 0, &graphicsQueue_);
+    vkGetDeviceQueue(device_, indices2.presentFamily.value(), 0, &presentQueue_);
   }
 
   /////////////////////////////////////////////////////////////////////////////////////
@@ -253,10 +260,10 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = findQueueFamilies(physicalDevice_);
-    uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+    QueueFamilyIndices indices2 = findQueueFamilies(physicalDevice_);
+    uint32_t queueFamilyIndices[] = { indices2.graphicsFamily.value(), indices2.presentFamily.value() };
 
-    if (indices.graphicsFamily != indices.presentFamily) {
+    if (indices2.graphicsFamily != indices2.presentFamily) {
       createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
       createInfo.queueFamilyIndexCount = 2;
       createInfo.pQueueFamilyIndices = queueFamilyIndices;
@@ -551,7 +558,7 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
 
       vkCmdBindIndexBuffer(commandBuffers_[i], indexBuffer_, 0, VK_INDEX_TYPE_UINT16);
 
-      vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+      vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(indices_.size()), 1, 0, 0, 0);
 
       vkCmdEndRenderPass(commandBuffers_[i]);
 
@@ -588,7 +595,7 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
   //////////////////////////////// Vertex Buffer //////////////////////////////////////
 
   void HelloTriangleApplication::createVertexBuffer() {
-    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+    VkDeviceSize bufferSize = sizeof(vertices_[0]) * vertices_.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -596,7 +603,7 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
 
     void* data;
     vkMapMemory(device_, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, vertices.data(), (size_t)bufferSize);
+    memcpy(data, vertices_.data(), (size_t)bufferSize);
     vkUnmapMemory(device_, stagingBufferMemory);
 
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer_, vertexBufferMemory_);
@@ -608,7 +615,7 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
   }
 
   void HelloTriangleApplication::createIndexBuffer() {
-    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+    VkDeviceSize bufferSize = sizeof(indices_[0]) * indices_.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -616,7 +623,7 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
 
     void* data;
     vkMapMemory(device_, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, indices.data(), (size_t)bufferSize);
+    memcpy(data, indices_.data(), (size_t)bufferSize);
     vkUnmapMemory(device_, stagingBufferMemory);
 
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer_, indexBufferMemory_);
@@ -1013,6 +1020,15 @@ const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_N
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
     return VK_FALSE;
+  }
+
+  const std::string HelloTriangleApplication::getAssetPath()
+  {
+#if defined(VK_EXAMPLE_DATA_DIR)
+    return VK_EXAMPLE_DATA_DIR;
+#else
+    return "./../data/";
+#endif
   }
 
  /***********************************************************************************************/
